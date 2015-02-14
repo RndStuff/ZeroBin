@@ -23,18 +23,17 @@ class vizhash16x16
     {
         $this->width=16;
         $this->height=16;
-        $this->salt = getServerSalt();
     }  
     
     // Generate a 16x16 png corresponding to $text.
     // Input: $text (string)
     // Output: PNG data. Or empty string if GD is not available.
-    function generate($text)
+    function generate($text, $salt)
     {
         if (!function_exists('gd_info')) return '';
 
         // We hash the input string.
-        $hash=hash('sha1',$text.$this->salt).hash('md5',$text.$this->salt);
+        $hash=hash('sha1',$text.$salt).hash('md5',$text.$salt);
         $hash=$hash.strrev($hash);  # more data to make graphics
 
         // We convert the hash into an array of integers.

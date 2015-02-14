@@ -1,6 +1,6 @@
 # Ignore data/ and tmp/
 data/
-tmp/
+tmp/*.php
 # Ignore for safety
 .htaccess
 .htpasswd
