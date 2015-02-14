@@ -367,7 +367,7 @@ function send_comment(parentid) {
 
     $.post(scriptLocation(), data_to_send, 'json')
             .error(function() {
-        showError('Comment could not be sent (serveur error or not responding).');
+        showError('Comment could not be sent (server error or not responding).');
     })
             .success(function(data) {
         if (data.status == 0) {
