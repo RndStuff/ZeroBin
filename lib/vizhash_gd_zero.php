@@ -1,5 +1,5 @@
 <?php
-// VizHash_GD 0.0.4 beta ZeroBin 0.18
+// VizHash_GD 0.0.4 beta ZeroBin 0.19
 // Visual Hash implementation in php4+GD, stripped down and modified version for ZeroBin
 // See: http://sebsauvage.net/wiki/doku.php?id=php:vizhash_gd
 // This is free software under the zlib/libpng licence
@@ -74,16 +74,7 @@ class vizhash16x16
         
         return $imagedata;
     } 
-    
-    // Generate a large random hexadecimal salt.
-    private function randomSalt()
-    {
-        $randomSalt='';
-        for($i=0;$i<6;$i++) { $randomSalt.=base_convert(mt_rand(),10,16); }
-        return $randomSalt;
-    }
-   
-    
+
     private function getInt() // Returns a single integer from the $VALUES array (0...255)
     {
         $v= $this->VALUES[$this->VALUES_INDEX]; 
