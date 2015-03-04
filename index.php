@@ -3,54 +3,21 @@
 if (version_compare(PHP_VERSION, '5.2.6') < 0) die('ZeroBin requires PHP 5.2.6 or above to work. Sorry.');
 
 $_config = array(
-    'timelimit'      => 2, // one requests per X seconds
+    'timelimit'      => 2, // one requests per X seconds per IP
     'paste_max_size' => 20, // in MiB
     'paste_id_len'   => 16,
 
     'salt_append'    => '_salt.php',
     'data_dir'       => 'data',
 
-    'version'        => "0.19.9-alpha",
+    'version'        => "0.19.10-alpha",
 );
 
-require_once "lib/serversalt.php";
-require_once "lib/vizhash_gd_zero.php";
+require_once('./lib/ratelimit.php');
+require_once('./lib/serversalt.php');
+require_once('./lib/vizhash_gd_zero.php');
 
-function traffic_limiter_time()
-{
-    global $_config;
-
-    return $_config['timelimit'];
-}
-
-function trafic_limiter_canPass($ip)
-{
-    global $_config;
-
-    $timelimit = traffic_limiter_time();
-
-    $tfilename = './' . $_config['data_dir'] . '/trafic_limiter.php';
-    if (!is_file($tfilename)) {
-        file_put_contents($tfilename, "<?php\n\$GLOBALS['trafic_limiter']=array();\n?>", LOCK_EX);
-        chmod($tfilename, 0705);
-    }
-    require $tfilename;
-    $tl = $GLOBALS['trafic_limiter'];
-    if (!empty($tl[$ip]) && ($tl[$ip] + $timelimit >= time())) {
-        return false;
-    } else {
-        unset($tl[$ip]);
-    }
-    foreach ($tl as $k => $v) {
-        if ($k != $ip && $v + $timelimit <= time()) {
-            unset($tl[$k]);
-        }
-    }
-    $tl[$ip] = time();
-    file_put_contents($tfilename, "<?php\n\$GLOBALS['trafic_limiter']=" . var_export($tl, true) . ";\n?>", LOCK_EX);
-
-    return true;
-}
+$rate_limit = new \zerobin\ratelimit('./'.$_config['data_dir'].'/rate.limit', $_config['timelimit']);
 
 // Constant time string comparison.
 // (Used to deter time attacks on hmac checking. See section 2.7 of https://defuse.ca/audits/zerobin.htm)
@@ -193,8 +160,8 @@ if (!empty($_POST['data'])) // Create new paste/comment
     }
 
     // Make sure last paste from the IP address was more than 10 seconds ago.
-    if (!trafic_limiter_canPass($_SERVER['REMOTE_ADDR'])) {
-        exit(json_encode(array('status' => 1, 'message' => 'Please wait ' . traffic_limiter_time() . ' seconds between each post.')));
+    if (!$rate_limit->check($_SERVER['REMOTE_ADDR'])) {
+        exit(json_encode(array('status' => 1, 'message' => 'Please wait ' . $rate_limit->getLimit() . ' seconds between each post.')));
     }
 
     // Make sure content is not too big.
