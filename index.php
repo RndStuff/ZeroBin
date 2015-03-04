@@ -186,8 +186,7 @@ if (!empty($_POST['data'])) // Create new paste/comment
     // Create storage directory if it does not exist.
     if (!is_dir($_config['data_dir'])) {
         if (!mkdir($_config['data_dir'], 0705)) {
-            echo json_encode(array('status' => 0, 'message' => 'Administrator has not set the write permissions to the paste directory.'));
-            exit;
+            exit(json_encode(array('status' => 0, 'message' => 'Administrator has not set the write permissions to the paste directory.')));
         }
 
         file_put_contents($_config['data_dir'] . '/.htaccess', "Allow from none\nDeny from all\n", LOCK_EX);
@@ -195,21 +194,18 @@ if (!empty($_POST['data'])) // Create new paste/comment
 
     // Make sure last paste from the IP address was more than 10 seconds ago.
     if (!trafic_limiter_canPass($_SERVER['REMOTE_ADDR'])) {
-        echo json_encode(array('status' => 1, 'message' => 'Please wait ' . traffic_limiter_time() . ' seconds between each post.'));
-        exit;
+        exit(json_encode(array('status' => 1, 'message' => 'Please wait ' . traffic_limiter_time() . ' seconds between each post.')));
     }
 
     // Make sure content is not too big.
     $data = $_POST['data'];
     if (strlen($data) > $_config['paste_max_size'] * 1024 * 1024) {
-        echo json_encode(array('status' => 1, 'message' => 'Paste is limited to ' . $_config['paste_max_size'] . 'MB of encrypted data.'));
-        exit;
+        exit(json_encode(array('status' => 1, 'message' => 'Paste is limited to ' . $_config['paste_max_size'] . 'MB of encrypted data.')));
     }
 
     // Make sure format is correct.
     if (!validSJCL($data)) {
-        echo json_encode(array('status' => 1, 'message' => 'Invalid data.'));
-        exit;
+        exit(json_encode(array('status' => 1, 'message' => 'Invalid data.')));
     }
 
     // Read additional meta-information.
@@ -285,24 +281,20 @@ if (!empty($_POST['data'])) // Create new paste/comment
         $pasteid = $_POST['pasteid'];
         $parentid = $_POST['parentid'];
         if (!preg_match('/\A[a-z0-9]+\z/', $pasteid)) {
-            echo json_encode(array('status' => 1, 'message' => 'Invalid data.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'Invalid data.')));
         }
         if (!preg_match('/\A[a-z0-9]+\z/', $parentid)) {
-            echo json_encode(array('status' => 1, 'message' => 'Invalid data.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'Invalid data.')));
         }
 
         $storagedir = dataid2path($pasteid);
         if (!is_file($storagedir . $pasteid)) {
-            echo json_encode(array('status' => 1, 'message' => 'Invalid data.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'Invalid data.')));
         }
 
         $paste = json_decode(file_get_contents($storagedir . $pasteid));
         if (!$paste->meta->opendiscussion) {
-            echo json_encode(array('status' => 1, 'message' => 'Invalid data.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'Invalid data.')));
         }
 
         $discdir = dataid2discussionpath($pasteid);
@@ -310,8 +302,7 @@ if (!empty($_POST['data'])) // Create new paste/comment
         if (!is_dir($discdir)) mkdir($discdir, $mode = 0705, $recursive = true);
         if (is_file($discdir . $filename)) // Oups... improbable collision.
         {
-            echo json_encode(array('status' => 1, 'message' => 'You are unlucky. Try again.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'You are unlucky. Try again.')));
         }
 
         if (!empty($_POST['nickname'])) {
@@ -332,8 +323,7 @@ if (!empty($_POST['data'])) // Create new paste/comment
         }
 
         if ($error) {
-            echo json_encode(array('status' => 1, 'message' => 'Invalid data.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'Invalid data.')));
         }
 
         unset($storage['expire_date']); // Comment do not expire (it's the paste that expires)
@@ -341,8 +331,7 @@ if (!empty($_POST['data'])) // Create new paste/comment
         unset($storage['syntaxcoloring']);
 
         file_put_contents($discdir . $filename, json_encode($storage), LOCK_EX);
-        echo json_encode(array('status' => 0, 'id' => $dataid)); // 0 = no error
-        exit;
+        exit(json_encode(array('status' => 0, 'id' => $dataid))); // 0 = no error
 
     } else // a standard paste.
     {
@@ -350,8 +339,7 @@ if (!empty($_POST['data'])) // Create new paste/comment
         if (!is_dir($storagedir)) mkdir($storagedir, $mode = 0705, $recursive = true);
         if (is_file($storagedir . $dataid)) // Oups... improbable collision.
         {
-            echo json_encode(array('status' => 1, 'message' => 'You are unlucky. Try again.'));
-            exit;
+            exit(json_encode(array('status' => 1, 'message' => 'You are unlucky. Try again.')));
         }
 
         file_put_contents($storagedir . $dataid, json_encode($storage), LOCK_EX);
@@ -361,8 +349,7 @@ if (!empty($_POST['data'])) // Create new paste/comment
         // The paste can be delete by calling http://myserver.com/zerobin/?pasteid=<pasteid>&deletetoken=<deletetoken>
         $deletetoken = hash_hmac('sha1', $dataid, getPasteSalt($dataid));
 
-        echo json_encode(array('status' => 0, 'id' => $dataid, 'deletetoken' => $deletetoken)); // 0 = no error
-        exit;
+        exit(json_encode(array('status' => 0, 'id' => $dataid, 'deletetoken' => $deletetoken))); // 0 = no error
     }
 }
 
