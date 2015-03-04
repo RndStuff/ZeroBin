@@ -35,16 +35,16 @@ class ratelimit {
         $this->prune();
     }
 
+    function save() {
+        file_put_contents($this->cache_path, serialize($this->cache), LOCK_EX);
+    }
+
     function prune() {
         $now = time();
         foreach($this->cache as $addr => $last_action) {
             if ($now - $this->requests_per_second >= $last_action)
                 unset($this->cache[$addr]);
         }
-    }
-
-    function save() {
-        file_put_contents($this->cache_path, serialize($this->cache), LOCK_EX);
     }
 
     /**
@@ -54,6 +54,7 @@ class ratelimit {
     function check($key) {
         if (empty($this->cache) || !isset($this->cache[$key]) || time() - $this->requests_per_second >= $this->cache[$key]) {
             $this->cache[$key] = time();
+            $this->save();
             return true;
         }
         return false;
