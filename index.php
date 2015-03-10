@@ -156,7 +156,8 @@ if (!empty($_POST['data'])) // Create new paste/comment
             exit(json_encode(array('status' => 0, 'message' => 'Administrator has not set the write permissions to the paste directory.')));
         }
 
-        file_put_contents($_config['data_dir'] . '/.htaccess', "Allow from none\nDeny from all\n", LOCK_EX);
+        file_put_contents($_config['data_dir'].'/.htaccess', "Allow from none\nDeny from all\n", LOCK_EX);
+        touch($_config['data_dir'].'/index.html' );
     }
 
     // Make sure last paste from the IP address was more than 10 seconds ago.
@@ -325,7 +326,7 @@ Returns an array ('',$ERRORMESSAGE,$STATUS)
 */
 function processPasteDelete($pasteid, $deletetoken)
 {
-    if (preg_match('/\A[a-z0-9]+{}\z/', $pasteid))  // Is this a valid paste identifier ?
+    if (preg_match('/\A[a-z0-9]+\z/', $pasteid)) // Is this a valid paste identifier ?
     {
         $filename = dataid2path($pasteid) . $pasteid;
         if (!is_file($filename)) // Check that paste exists.
