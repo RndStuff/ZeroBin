@@ -57,18 +57,18 @@ function getSaltFromFile($file)
 
 function getServerSalt()
 {
-    global $aConfig;
+    global $_config;
 
-    return getSaltFromFile( $aConfig[ 'data_dir' ]. '/salt.php' );
+    return getSaltFromFile( $_config[ 'data_dir' ]. '/salt.php' );
 }
 
 
 
 function getPasteSalt( $pasteid )
 {
-    global $aConfig;
+    global $_config;
 
-    $file = dataid2path ( $pasteid ).$pasteid.$aConfig[ 'salt_append '];
+    $file = dataid2path($pasteid).$pasteid.$aConfig['salt_append'];
     return getSaltFromFile($file);
 }
 
