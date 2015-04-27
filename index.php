@@ -150,10 +150,15 @@ if (!empty($_POST['data'])) // Create new paste/comment
     header('Content-type: application/json');
     $error = false;
 
-    // Create storage directory if it does not exist.
-    if (!is_dir($_config['data_dir'])) {
-        if (!mkdir($_config['data_dir'], 0705)) {
-            exit(json_encode(array('status' => 0, 'message' => 'Administrator has not set the write permissions to the paste directory.')));
+// Create storage directory if it does not exist.
+    if ( !is_dir ( $aConfig[ 'data_dir' ] ) )
+    {
+        mkdir ( $aConfig[ 'data_dir' ], 0600 );
+        
+        if ( !is_dir ( $aConfig[ 'data_dir' ] ) )
+        {
+            echo json_encode( array( 'status' => 0, 'message' => 'Administrator has not set the write permissions to the pastebin directory.') );
+            exit;
         }
 
         file_put_contents($_config['data_dir'].'/.htaccess', "Allow from none\nDeny from all\n", LOCK_EX);
