@@ -1242,6 +1242,7 @@ function getFileTypeFromMimeType(mime) {
         'application/x-scilab-xcos': 'xcos',
         'application/x-sh': 'sh',
         'application/x-sha1': 'sha1',
+        'application/x-sha256': 'sha256',
         'application/x-shar': 'shar',
         'application/x-shellscript': '',
         'application/x-shockwave-flash': 'swf',
