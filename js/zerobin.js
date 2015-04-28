@@ -263,7 +263,7 @@ function displayMessages(key, comments) {
     if (comments[0].meta.syntaxcoloring)
     {
         applySyntaxColoring();
-                addLineNumbers();
+        addLineNumbers();
 
     }
     // Display paste expiration.
