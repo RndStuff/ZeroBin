@@ -29,10 +29,6 @@ div#status {
     padding:5px 10px;
 }
 
-div#media-left {
-    margin-bottom:10px;
-}
-
 div#toolbar, div#status { margin-bottom:5px; }
 
 div#expiration select {
