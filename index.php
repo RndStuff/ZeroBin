@@ -402,10 +402,10 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
 
         file_put_contents ( $storagedir.$dataid, json_encode ( $storage ), LOCK_EX );
 
-// Generate the "delete" token.
-// The token is the hmac of the pasteid signed with the server salt.
-// The paste can be delete by calling http://myserver.com/zerobin/?pasteid=<pasteid>&deletetoken=<deletetoken>
-        $deletetoken = hash_hmac ( 'sha1', $dataid, getPasteSalt ($dataid) );
+        // Generate the "delete" token.
+        // The token is the hmac of the pasteid signed with the server salt.
+        // The paste can be delete by calling http://myserver.com/zerobin/?pasteid=<pasteid>&deletetoken=<deletetoken>
+        $deletetoken = hash_hmac ( 'sha256', $dataid, getPasteSalt ($dataid) );
 
         echo json_encode ( array('status' => 0, 'id' => $dataid, 'deletetoken' => $deletetoken) ); // 0 = no error
         exit;
@@ -432,7 +432,7 @@ function processPasteDelete ( $pasteid, $deletetoken )
         return array('', 'Invalid data', '');
     }
 
-    if ( !slow_equals ( $deletetoken, hash_hmac ( 'sha1', $pasteid, getPasteSalt ($pasteid) ) ) ) // Make sure token is valid.
+    if ( !slow_equals ( $deletetoken, hash_hmac ( 'sha256', $pasteid, getPasteSalt ($pasteid) ) ) ) // Make sure token is valid.
     {
         return array('', 'Wrong deletion token. Paste was not deleted.', '');
     }
