@@ -33,7 +33,7 @@ class vizhash64x64
         if (!function_exists('gd_info')) return '';
 
         // We hash the input string.
-        $hash=hash('sha1',$text.$salt).hash('md5',$text.$salt);
+        $hash=hash('sha256',$text.$salt).hash('md5',$text.$salt);
         $hash=$hash.strrev($hash);  # more data to make graphics
 
         // We convert the hash into an array of integers.
