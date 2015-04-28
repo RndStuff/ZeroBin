@@ -6,4 +6,8 @@ browser using 256 bits AES.
 
 This is the forked version of ZeroBin 0.19 Alpha (https://github.com/sebsauvage/ZeroBin) which contains added functionality and support for files, and also uses the simplified bootstrap theme
 
+
+DEMO:
+
+(https://paste.scurvynet.com)
 Tested in Chromium 44
