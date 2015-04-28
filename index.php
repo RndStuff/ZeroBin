@@ -4,13 +4,13 @@ if ( version_compare ( PHP_VERSION, '5.2.6' ) < 0 ) die( 'ZeroBin requires PHP 5
 
 $aConfig = array();
 
-$aConfig[ 'version' ]     = "Alpha 0.19.10";
+$aConfig[ 'version' ]     = "Alpha 0.20.00";
 
 $aConfig[ 'timelimit' ]   = 2;              // One request allowed every X seconds
-$aConfig[ 'salt_append' ] = "_salt.php";    
+$aConfig[ 'salt_append' ] = "_salt.php";
 $aConfig[ 'data_dir' ]    = "data";
 $aConfig[ 'max_size' ]    = 20;             // Max paste size in MB
-$aConfig[ 'pasteid_len' ] = 16;             
+$aConfig[ 'pasteid_len' ] = 16;
 
 
 require_once "lib/serversalt.php";
@@ -165,7 +165,7 @@ function deletePaste ( $pasteid )
         $dhandle = opendir ( $dpath );
         while ( false !== ( $filename = readdir ( $dhandle ) ) )
         {
-            if ( is_file ( $dpath.$filename ) ) 
+            if ( is_file ( $dpath.$filename ) )
                 unlink ( $dpath.$filename );
         }
         closedir ( $dhandle );
@@ -201,7 +201,7 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
     if ( !is_dir ( $aConfig[ 'data_dir' ] ) )
     {
         mkdir ( $aConfig[ 'data_dir' ], 0600 );
-        
+
         if ( !is_dir ( $aConfig[ 'data_dir' ] ) )
         {
             echo json_encode( array( 'status' => 0, 'message' => 'Administrator has not set the write permissions to the pastebin directory.') );
@@ -361,15 +361,15 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
             if ( !validSJCL ( $nick ) )
             {
                 $error = true;
-            } 
+            }
             else
             {
                 // Generation of the anonymous avatar (Vizhash):
                 // If a nickname is provided, we generate a Vizhash.
                 // (We assume that if the user did not enter a nickname, he/she wants
                 // to be anonymous and we will not generate the vizhash.)
-                
-                $vz      = new vizhash16x16();
+
+                $vz      = new vizhash64x64();
                 $storage['meta'][ 'nickname' ] = $nick;
                 $pngdata = $vz->generate ( $_SERVER[ 'REMOTE_ADDR' ], getPasteSalt ( $pasteid ) );
                 if ( $pngdata != '' ) $storage['meta'][ 'vizhash' ] = 'data:image/png;base64,'.base64_encode ( $pngdata );
@@ -453,7 +453,7 @@ function processPasteFetch ( $pasteid )
         $filename = dataid2path ( $pasteid ).$pasteid;
         if ( !is_file ( $filename ) ) // Check that paste exists.
         {
-            return array('', 'Paste does not exist, has expired or has been deleted.', '');
+            return array('', 'Paste does not exist, has expired, burned or has been deleted.', '');
         }
     } else
     {
@@ -487,10 +487,10 @@ function processPasteFetch ( $pasteid )
             if ( is_file ( $datadir.$filename ) )
             {
                 $comment = json_decode ( file_get_contents ( $datadir.$filename ) );
-// Filename is in the form pasteid.commentid.parentid:
-// - pasteid is the paste this reply belongs to.
-// - commentid is the comment identifier itself.
-// - parentid is the comment this comment replies to (It can be pasteid)
+                // Filename is in the form pasteid.commentid.parentid:
+                // - pasteid is the paste this reply belongs to.
+                // - commentid is the comment identifier itself.
+                // - parentid is the comment this comment replies to (It can be pasteid)
                 $items                                = explode ( '.', $filename );
                 $comment->meta->commentid             = $items[ 1 ]; // Add some meta information not contained in file.
                 $comment->meta->parentid              = $items[ 2 ];
