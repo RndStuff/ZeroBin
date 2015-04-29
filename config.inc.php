@@ -68,7 +68,6 @@ $cfg["maxPostSize"] = 20;             // Max paste size in MB
  */
 $cfg["showHash"] = true;
 
-// the for the salt file
 /*
  * since we generate the salt on the fly for each post, what should we append
  * the for the salt file
