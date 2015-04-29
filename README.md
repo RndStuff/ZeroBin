@@ -8,6 +8,14 @@ This is the forked version of ZeroBin 0.19 Alpha (https://github.com/sebsauvage/
 
 Code was also pulled from other forks, please look at the fork list on github for merges and changes
 
+Notes:
+
+* salts are generated on the fly per paste
+* uses bootstrap theme
+* config file driven
+
+
+
 DEMO: (https://paste.scurvynet.com)
 
 Screenshot:
