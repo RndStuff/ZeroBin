@@ -4,26 +4,11 @@
         <title>ZeroBin</title>
         <meta name="robots" content="noindex" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="js/jquery.js?{$VERSION|rawurlencode}#"></script>
-        <script src="js/sjcl.js?{$VERSION|rawurlencode}#"></script>
-        <script src="js/base64.js?{$VERSION|rawurlencode}#"></script>
-        <script src="js/rawdeflate.js?{$VERSION|rawurlencode}#"></script>
-        <script src="js/rawinflate.js?{$VERSION|rawurlencode}#"></script>
-        <script src="js/zerobin.js?{$VERSION|rawurlencode}#"></script>
+        <meta charset="utf-8" />
         {if condition="$cfg['enableSyntaxHighlighting']"}
-          <link type="text/css" rel="stylesheet" href="js/highlight.styles/tomorrow.css?{$VERSION|rawurlencode}#">
-          <script src="js/highlight.pack.js?{$VERSION|rawurlencode}#"></script>
+          <link type="text/css" rel="stylesheet" href="js/highlight.styles/{$cfg['highlightTheme']}.css?{$VERSION|rawurlencode}#">
         {/if}
-
-        <!--[if lt IE 10]>
-        <style> body {padding-left:60px;padding-right:60px;} div#ienotice {display:block;} </style>
-        <![endif]-->
-
-        <!--[if lt IE 10]>
-        <style> div#ienotice {display:block; }  div#oldienotice {display:block; } </style>
-        <![endif]-->
-
-        <!-- Switching to Bootstrap/Hosted -->
+        <!-- Switching to Bootstrap -->
         <link rel="stylesheet" href="css/bootstrap.min.css?{$VERSION|rawurlencode}#">
         <link rel="stylesheet" href="css/bootstrap-theme.min.css?{$VERSION|rawurlencode}#">
         <link type="text/css" rel="stylesheet" href="css/zerobin.css?{$VERSION|rawurlencode}#" />
@@ -137,6 +122,15 @@
         {/if}
         <div id="cipherdata" style="display:none;">{$CIPHERDATA}</div>
         <script src="js/bootstrap.min.js?{$VERSION|rawurlencode}#"></script>
+        <script src="js/jquery.js?{$VERSION|rawurlencode}#"></script>
+        <script src="js/sjcl.js?{$VERSION|rawurlencode}#"></script>
+        <script src="js/base64.js?{$VERSION|rawurlencode}#"></script>
+        <script src="js/rawdeflate.js?{$VERSION|rawurlencode}#"></script>
+        <script src="js/rawinflate.js?{$VERSION|rawurlencode}#"></script>
+        <script src="js/zerobin.js?{$VERSION|rawurlencode}#"></script>
+        {if condition="$cfg['enableSyntaxHighlighting']"}
+          <script src="js/highlight.pack.js?{$VERSION|rawurlencode}#"></script>
+        {/if}
     </div>
     </body>
 </html>

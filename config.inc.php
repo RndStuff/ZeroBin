@@ -96,6 +96,12 @@ $cfg["enableDiscussionSystem"] = true;
 $cfg["enableSyntaxHighlighting"] = true;
 
 /*
+ * set the highlight theme
+ * https://github.com/isagalaev/highlight.js/tree/master/src/styles
+ */
+$cfg["highlightTheme"] = "tomorrow";
+
+/*
  * Set this to false to disable uploading images, this will imply that
  * you also cannot download image.
  */
