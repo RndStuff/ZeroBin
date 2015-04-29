@@ -2,58 +2,38 @@
 
 if ( version_compare ( PHP_VERSION, '5.2.6' ) < 0 ) die( 'ZeroBin requires PHP 5.2.6 or above to work. Sorry.' );
 
-$aConfig = array();
-
-$aConfig[ 'version' ]     = "Alpha 0.20.00";
-
-$aConfig[ 'timelimit' ]   = 2;              // One request allowed every X seconds
-$aConfig[ 'salt_append' ] = "_salt.php";
-$aConfig[ 'data_dir' ]    = "data";
-$aConfig[ 'max_size' ]    = 20;             // Max paste size in MB
-$aConfig[ 'pasteid_len' ] = 16;
-
-
+require_once "config.inc.php";
 require_once "lib/serversalt.php";
 require_once "lib/vizhash_gd_zero.php";
 
-function traffic_limiter_time()
+// hardcodes the version as config files may not change
+$cfg["version"]     = "Alpha 0.20.00";
+
+// trafic_limiter : Make sure the IP address makes at most 1 request every 10 seconds.
+// Will return false if IP address made a call less than 10 seconds ago.
+function trafic_limiter_canPass($ip)
 {
-    global $aConfig;
-
-    return $aConfig[ 'timelimit' ];
-}
-
-function trafic_limiter_canPass ( $ip )
-{
-    global $aConfig;
-
-    $timelimit = traffic_limiter_time();
-
-    $tfilename = './'.$aConfig[ 'data_dir' ].'/trafic_limiter.php';
-    if ( !is_file ( $tfilename ) )
+    global $cfg;
+    $timeBetweenPosts = $cfg["timeBetweenPosts"];
+    // -1: no rate limiting
+    if($timeBetweenPosts == -1) {
+        return true;
+    }
+    $tfilename = './'.$cfg[ 'dataDir' ].'/trafic_limiter.php';
+    if (!is_file($tfilename))
     {
-        file_put_contents ( $tfilename, "<?php\n\$GLOBALS['trafic_limiter']=array();\n?>", LOCK_EX );
-        chmod ( $tfilename, 0705 );
+        file_put_contents($tfilename,"<?php\n\$GLOBALS['trafic_limiter']=array();\n?>");
+        chmod($tfilename,0705);
     }
     require $tfilename;
-    $tl = $GLOBALS[ 'trafic_limiter' ];
-    if ( !empty( $tl[ $ip ] ) && ( $tl[ $ip ] + $timelimit >= time () ) )
+    $tl=$GLOBALS['trafic_limiter'];
+    if (!empty($tl[$ip]) && ($tl[$ip] + $timeBetweenPosts >=time()))
     {
         return false;
-    } else
-    {
-        unset( $tl[ $ip ] );
+        // FIXME: purge file of expired IPs to keep it small
     }
-    foreach ( $tl as $k => $v )
-    {
-        if ( $k != $ip && $v + $timelimit <= time () )
-        {
-            unset( $tl[ $k ] );
-        }
-    }
-    $tl[ $ip ] = time ();
-    file_put_contents ( $tfilename, "<?php\n\$GLOBALS['trafic_limiter']=".var_export ( $tl, true ).";\n?>", LOCK_EX );
-
+    $tl[$ip]=time();
+    file_put_contents($tfilename, "<?php\n\$GLOBALS['trafic_limiter']=".var_export($tl,true).";\n?>");
     return true;
 }
 
@@ -81,9 +61,9 @@ eg. input 'e3570978f9e4aa90' --> output 'data/e3/57/'
 */
 function dataid2path ( $dataid )
 {
-    global $aConfig;
+    global $cfg;
 
-    return $aConfig[ 'data_dir' ].'/'.substr ( $dataid, 0, 2 ).'/'.substr ( $dataid, 2, 2 ).'/';
+    return $cfg[ 'dataDir' ].'/'.substr ( $dataid, 0, 2 ).'/'.substr ( $dataid, 2, 2 ).'/';
 }
 
 /* Convert paste id to discussion storage path.
@@ -150,13 +130,14 @@ function validSJCL ( $jsonstring )
 // Input: $pasteid : the paste identifier.
 function deletePaste ( $pasteid )
 {
-    global $aConfig;
+    global $cfg;
 
     $path = dataid2path ( $pasteid );
     $dpath = dataid2discussionpath( $pasteid );
+
 // Delete the paste itself and the salt
     unlink ( $path.$pasteid );
-    unlink ( $path.$pasteid.$aConfig[ 'salt_append' ] );
+    unlink ( $path.$pasteid.$cfg[ 'saltAppend' ] );
 
 // Delete discussion if it exists.
     if ( is_dir ( $dpath ) )
@@ -198,32 +179,34 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
     $error = false;
 
 // Create storage directory if it does not exist.
-    if ( !is_dir ( $aConfig[ 'data_dir' ] ) )
+    if ( !is_dir ( $cfg[ 'dataDir' ] ) )
     {
-        mkdir ( $aConfig[ 'data_dir' ], 0600 );
+        mkdir ( $cfg[ 'dataDir' ], 0600 );
 
-        if ( !is_dir ( $aConfig[ 'data_dir' ] ) )
+        if ( !is_dir ( $cfg[ 'dataDir' ] ) )
         {
             echo json_encode( array( 'status' => 0, 'message' => 'Administrator has not set the write permissions to the pastebin directory.') );
             exit;
         }
 
-        file_put_contents ( $aConfig[ 'data_dir' ].'/.htaccess', "Allow from none\nDeny from all\n", LOCK_EX );
-        touch( $aConfig[ 'data_dir' ].'/index.html' );
+        file_put_contents ( $cfg[ 'dataDir' ].'/.htaccess', "Allow from none\nDeny from all\n", LOCK_EX );
+        touch( $cfg[ 'dataDir' ].'/index.html' );
     }
 
 // Make sure last paste from the IP address was more than 10 seconds ago.
     if ( !trafic_limiter_canPass ( $_SERVER[ 'REMOTE_ADDR' ] ) )
     {
-        echo json_encode ( array('status' => 1, 'message' => 'Please wait '.traffic_limiter_time().' seconds between each post.') );
+        echo json_encode ( array('status' => 1, 'message' => 'Please wait '.$cfg["timeBetweenPosts"].' seconds between each post.') );
         exit;
     }
 
 // Make sure content is not too big.
     $data = $_POST[ 'data' ];
-    if ( strlen ( $data ) > $aConfig[ 'max_size' ] * 1024 * 1024 )
+    $maxPostSize = $cfg["maxPostSize"];
+
+    if ( strlen ( $data ) > $maxPostSize * 1024 * 1024 )
     {
-        echo json_encode ( array('status' => 1, 'message' => 'Paste is limited to '.$aConfig[ 'max_size' ].'MB of encrypted data.') );
+        echo json_encode ( array('status' => 1, 'message' => 'Paste is limited to '.$cfg["maxPostSize"].'MB of encrypted data.') );
         exit;
     }
 
@@ -241,14 +224,21 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
 // Read expiration date
     if ( !empty( $_POST[ 'expire' ] ) )
     {
-        $expire = $_POST[ 'expire' ];
-        if ( $expire == '5min' ) $meta[ 'expire_date' ] = time () + 5 * 60;
-        elseif ( $expire == '10min' ) $meta[ 'expire_date' ] = time () + 10 * 60;
-        elseif ( $expire == '1hour' ) $meta[ 'expire_date' ] = time () + 60 * 60;
-        elseif ( $expire == '1day' ) $meta[ 'expire_date' ] = time () + 24 * 60 * 60;
-        elseif ( $expire == '1week' ) $meta[ 'expire_date' ] = time () + 7 * 24 * 60 * 60;
-        elseif ( $expire == '1month' ) $meta[ 'expire_date' ] = time () + 30 * 24 * 60 * 60; // Well this is not *exactly* one month, it's 30 days.
-        elseif ( $expire == '1year' ) $meta[ 'expire_date' ] = time () + 365 * 24 * 60 * 60;
+      $expire=$_POST['expire'];
+      if(array_key_exists($expire, $cfg["expire"])) {
+          // Valid expiration info
+          $expireDelay = $cfg["expire"][$expire];
+          if($expireDelay != -1) { // -1 means never
+              $meta['expire_date'] = time() + $expireDelay;
+          }
+      } else {
+          // Use default for an invalid POST expire name.
+          // Will also be executed for empty keys
+          $expireDelay = $cfg["expire"][$cfg["expireDefault"]];
+          if($expireDelay != -1) { // -1 means never
+              $meta['expire_date'] = time() + $expireDelay;
+            }
+      }
     }
 
 // Destroy the paste when it is read.
@@ -266,7 +256,7 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
     }
 
 // Read open discussion flag
-    if ( !empty( $_POST[ 'opendiscussion' ] ) )
+    if ( !empty( $_POST[ 'opendiscussion' ] ) && $cfg["enableDiscussionSystem"])
     {
         $opendiscussion = $_POST[ 'opendiscussion' ];
         if ( $opendiscussion != '0' && $opendiscussion != '1' )
@@ -280,7 +270,7 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
     }
 
 // Should we use syntax coloring when displaying ?
-    if ( !empty( $_POST[ 'syntaxcoloring' ] ) )
+    if ( !empty( $_POST[ 'syntaxcoloring' ] ) && $cfg["enableSyntaxHighlighting"])
     {
         $syntaxcoloring = $_POST[ 'syntaxcoloring' ];
         if ( $syntaxcoloring != '0' && $syntaxcoloring != '1' )
@@ -296,13 +286,13 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
 // You can't have an open discussion on a "Burn after reading" paste:
     if ( isset( $meta[ 'burnafterreading' ] ) ) unset( $meta[ 'opendiscussion' ] );
 
-    if( $aConfig[ 'pasteid_len' ] <= 32)
+    if( $cfg[ 'pasteidLength' ] <= 32)
     {
-        $dataid = str_shuffle( substr ( hash ( 'md5', $data ), 0, $aConfig[ 'pasteid_len' ] ) );
+        $dataid = str_shuffle( substr ( hash ( 'md5', $data ), 0, $cfg[ 'pasteidLength' ] ) );
     }
     else
     {
-        $dataid = str_shuffle ( substr ( md5 ( $data ) . generateRandomString( $aConfig['pasteid_len'] , true) , 0, $aConfig[ 'pasteid_len' ] ) );
+        $dataid = str_shuffle ( substr ( md5 ( $data ) . generateRandomString( $cfg[ 'pasteidLength' ] , true) , 0, $cfg[ 'pasteidLength' ] ) );
     }
 
     $is_comment = ( !empty( $_POST[ 'parentid' ] ) && !empty( $_POST[ 'pasteid' ] ) ); // Is this post a comment ?
@@ -407,7 +397,7 @@ if ( !empty( $_POST[ 'data' ] ) ) // Create new paste/comment
         // The paste can be delete by calling http://myserver.com/zerobin/?pasteid=<pasteid>&deletetoken=<deletetoken>
         $deletetoken = hash_hmac ( 'sha256', $dataid, getPasteSalt ($dataid) );
 
-        echo json_encode ( array('status' => 0, 'id' => $dataid, 'deletetoken' => $deletetoken) ); // 0 = no error
+        echo json_encode(array('status'=>0,'id'=>$dataid,'deletetoken'=>$deletetoken,'showHash'=>$cfg['showHash'])); // 0 = no error
         exit;
     }
 
@@ -448,6 +438,7 @@ Returns an array ($CIPHERDATA,$ERRORMESSAGE,$STATUS)
 */
 function processPasteFetch ( $pasteid )
 {
+    global $cfg;
     if ( preg_match ( '/\A[a-z0-9]+\z/', $pasteid ) )  // Is this a valid paste identifier ?
     {
         $filename = dataid2path ( $pasteid ).$pasteid;
@@ -471,12 +462,13 @@ function processPasteFetch ( $pasteid )
     }
 
 
-// We kindly provide the remaining time before expiration (in seconds)
+    // We kindly provide the remaining time before expiration (in seconds)
     if ( property_exists ( $paste->meta, 'expire_date' ) ) $paste->meta->remaining_time = $paste->meta->expire_date - time ();
 
     $messages = array($paste); // The paste itself is the first in the list of encrypted messages.
-// If it's a discussion, get all comments.
-    if ( property_exists ( $paste->meta, 'opendiscussion' ) && $paste->meta->opendiscussion )
+
+    // If it's a discussion, get all comments, unless discussions are disabled
+    if (property_exists($paste->meta, 'opendiscussion') && $paste->meta->opendiscussion && $cfg["enableDiscussionSystem"])
     {
         $comments = array();
         $datadir  = dataid2discussionpath ( $pasteid );
@@ -525,8 +517,9 @@ if ( !empty( $_GET[ 'deletetoken' ] ) && !empty( $_GET[ 'pasteid' ] ) ) // Delet
 require_once "lib/rain.tpl.class.php";
 header ( 'Content-Type: text/html; charset=utf-8' );
 $page = new RainTPL;
+$page->assign ( 'cfg', $cfg );
 $page->assign ( 'CIPHERDATA', htmlspecialchars ( $CIPHERDATA, ENT_NOQUOTES ) );  // We escape it here because ENT_NOQUOTES can't be used in RainTPL templates.
-$page->assign ( 'VERSION', $aConfig[ 'version' ] );
+$page->assign ( 'VERSION', $cfg[ 'version' ] );
 $page->assign ( 'ERRORMESSAGE', $ERRORMESSAGE );
 $page->assign ( 'STATUS', $STATUS );
 $page->draw ( 'page' );

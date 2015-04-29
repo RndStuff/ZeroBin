@@ -451,11 +451,12 @@ function send_data() {
         if (data.status == 0) {
             stateExistingPaste();
             var url = scriptLocation() + "?" + data.id + '#' + randomkey;
+            var visibleURL = data.showHash ? url : scriptLocation() + "?" + data.id + '#' + randomkey;
             var deleteUrl = "location.href='" + scriptLocation() + "?pasteid=" + data.id + '&deletetoken=' + data.deletetoken + "'";
 
             // new paste link
             showStatus('');
-            showStatus('Your paste is <a id="pasteurl" href="' + url + '">' + url + '</a> <span id="copyhint">(Hit CTRL+C to copy)</span>');
+            showStatus('Your paste is <a id="pasteurl" href="' + url + '">' + visibleURL + '</a> <span id="copyhint">(Hit CTRL+C to copy)</span>');
             selectText('pasteurl'); // We pre-select the link so that the user only has to CTRL+C the link.
 
             // delete link
@@ -1587,17 +1588,23 @@ function showPreview() {
 $(function() {
 
     // If "burn after reading" is checked, disable discussion.
-    $('input#burnafterreading').change(function() {
-        if ($(this).is(':checked')) {
+    function onBurnAfterReadingCheckboxChange() {
+        if ($("input#burnafterreading").is(':checked') ) {
             $('div#opendisc').addClass('buttondisabled');
             $('input#opendiscussion').attr({checked: false});
-            $('input#opendiscussion').attr('disabled', true);
+            $('input#opendiscussion').attr('disabled',true);
         }
         else {
             $('div#opendisc').removeClass('buttondisabled');
             $('input#opendiscussion').removeAttr('disabled');
         }
-    });
+    }
+
+    // If "burn after reading" is checked, disable discussion.
+    $('input#burnafterreading').change(onBurnAfterReadingCheckboxChange);
+
+    // ...it might be enabled or disabled by default
+    onBurnAfterReadingCheckboxChange();
 
     // Display status returned by php code if any (eg. Paste was properly deleted.)
     if ($('div#status').text().length > 0) {

@@ -10,8 +10,10 @@
         <script src="js/rawdeflate.js?{$VERSION|rawurlencode}#"></script>
         <script src="js/rawinflate.js?{$VERSION|rawurlencode}#"></script>
         <script src="js/zerobin.js?{$VERSION|rawurlencode}#"></script>
-        <link type="text/css" rel="stylesheet" href="js/highlight.styles/github.css?{$VERSION|rawurlencode}#">
-        <script src="js/highlight.pack.js?{$VERSION|rawurlencode}#"></script>
+        {if condition="$cfg['enableSyntaxHighlighting']"}
+          <link type="text/css" rel="stylesheet" href="js/highlight.styles/tomorrow.css?{$VERSION|rawurlencode}#">
+          <script src="js/highlight.pack.js?{$VERSION|rawurlencode}#"></script>
+        {/if}
 
         <!--[if lt IE 10]>
         <style> body {padding-left:60px;padding-right:60px;} div#ienotice {display:block;} </style>
@@ -69,38 +71,49 @@
 
           <div class="btn btn-info" id="expiration"><span class="glyphicon glyphicon-time" aria-hidden="true"></span> Expire
               <select id="pasteExpiration" name="pasteExpiration">
-                  <option value="5min">5 minutes</option>
-                  <option value="10min">10 minutes</option>
-                  <option value="1hour">1 hour</option>
-                  <option value="1day">1 day</option>
-                  <option value="1week">1 week</option>
-                  <option value="1month" selected="selected">1 month</option>
-                  <option value="1year">1 year</option>
-                  <option value="never">Never</option>
+                {loop="$cfg['expireLabels']"}
+                  {if condition="$cfg['expireSelected'] == $key"}
+                    <option value="{$key}" selected="selected">{$value}</option>
+                  {else}
+                    <option value="{$key}">{$value}</option>
+                  {/if}
+                {/loop}
               </select>
           </div>
           <div id="burnafterreadingoption" class="btn btn-warning">
               <span class="glyphicon glyphicon-fire" aria-hidden="true"></span>
-              <input type="checkbox" id="burnafterreading" name="burnafterreading" />
+              {if condition="$cfg['burnAfterReadingSelected']"}
+                <input type="checkbox" id="burnafterreading" name="burnafterreading" checked="checked" />
+              {else}
+                <input type="checkbox" id="burnafterreading" name="burnafterreading" />
+              {/if}
               <label for="burnafterreading" >Burn after reading</label>
           </div>
-          <div id="opendisc" class="btn btn-info">
-              <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-              <input type="checkbox" id="opendiscussion" name="opendiscussion" />
-              <label for="opendiscussion"> Open discussion</label>
-          </div>
-          <div id="syntaxcoloringoption" class="btn btn-info">
-              <span class="glyphicon glyphicon-grain" aria-hidden="true"></span>
-              <input type="checkbox" id="syntaxcoloring" name="syntaxcoloring" checked/>
-              <label for="syntaxcoloring"> Syntax coloring</label>
-          </div>
-          <div id="attachfile" class="btn btn-info">
-            <input type="file" id="uploadImage" name="files[]" onchange="readFileData();" />
-          </div>
-          <div id="downloadButton" class="btn btn-info" style="display: none;">
-            <span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>
-            <a download="" target="_blank" id="download"> Download</a>
-          </div>
+          {if condition="$cfg['enableDiscussionSystem']"}
+            <div id="opendisc" class="btn btn-info">
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                <input type="checkbox" id="opendiscussion" name="opendiscussion" />
+                <label for="opendiscussion"> Open discussion</label>
+            </div>
+          {/if}
+          {if condition="$cfg['enableSyntaxHighlighting']"}
+            <div id="syntaxcoloringoption" class="btn btn-info">
+                <span class="glyphicon glyphicon-grain" aria-hidden="true"></span>
+                <input type="checkbox" id="syntaxcoloring" name="syntaxcoloring" checked/>
+                <label for="syntaxcoloring"> Syntax coloring</label>
+            </div>
+          {/if}
+          {if condition="$cfg['enableImageUploads']"}
+            <div id="attachfile" class="btn btn-info">
+              <input type="file" id="uploadImage" name="files[]" onchange="readFileData();" />
+            </div>
+            {if condition="$cfg['enableImageDownloads']"}
+              <div id="downloadButton" class="btn btn-info" style="display: none;">
+                <span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>
+                <a download="" target="_blank" id="download"> Download</a>
+              </div>
+            {/if}
+          {/if}
         </div>
         <div class="col-xs-4 col-md-2">
           <div class="pull-right">
@@ -115,11 +128,13 @@
         <div id="cleartext" style="display:none;"></div>
         <textarea id="message" name="message" cols="80" rows="25" style="display:none;"></textarea>
         <img id="uploadPreview" src="" alt="Image preview"  style="display: none;" />
-        <div id="discussion" style="display:none;">
-            <h4>Discussion</h4>
-            <div id="comments">
-            </div>
-        </div>
+        {if condition="$cfg['enableDiscussionSystem']"}
+          <div id="discussion" style="display:none;">
+              <h4>Discussion</h4>
+              <div id="comments">
+              </div>
+          </div>
+        {/if}
         <div id="cipherdata" style="display:none;">{$CIPHERDATA}</div>
         <script src="js/bootstrap.min.js?{$VERSION|rawurlencode}#"></script>
     </div>

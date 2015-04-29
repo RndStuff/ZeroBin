@@ -8,7 +8,7 @@ function generateRandomSalt($len = 128)
     {
         $randomSalt = bin2hex(mcrypt_create_iv(256, MCRYPT_DEV_URANDOM));
     }
-    else 
+    else
     {
         generateRandomString($len);
     }
@@ -26,8 +26,8 @@ function generateRandomString($len = 128, $lowercase_only = false)
     }
 
     $string = NULL;
-    for($i = 0; $i < $len; $i++) 
-    { 
+    for($i = 0; $i < $len; $i++)
+    {
         $string .= $characters[mt_rand(0, strlen($characters) -1)];
     }
     return $string;
@@ -57,18 +57,18 @@ function getSaltFromFile($file)
 
 function getServerSalt()
 {
-    global $aConfig;
+    global $cfg;
 
-    return getSaltFromFile( $aConfig[ 'data_dir' ]. '/salt.php' );
+    return getSaltFromFile( $cfg[ 'dataDir' ]. '/salt.php' );
 }
 
 
 
 function getPasteSalt( $pasteid )
 {
-    global $aConfig;
+    global $cfg;
 
-    $file = dataid2path ( $pasteid ).$pasteid.$aConfig[ 'salt_append' ];
+    $file = dataid2path ( $pasteid ).$pasteid.$cfg[ 'saltAppend' ];
     return getSaltFromFile($file);
 }
 
