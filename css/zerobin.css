@@ -94,7 +94,7 @@ textarea#replymessage {
 
 #downloadButton{padding:7px;}
 
-/*
+
 pre {
   counter-reset: lines;
 }
@@ -107,7 +107,7 @@ pre .line::before {
   padding-right: 0.5em; margin-right: 0.5em;
   color: #BBB; border-right: solid 1px;
 }
-*/
+
 pre ol {
 list-style:decimal outside none;
 }
