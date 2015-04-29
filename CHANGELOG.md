@@ -16,22 +16,22 @@
   * **Alpha 0.9 (2012-04-11):**
     * Oh bummer... IE 8 is as shitty as IE6/7: Its does not seem to support ''white-space:pre-wrap'' correctly. I had to activate the special handling mode. I still have to test IE 9.
   * **Alpha 0.10 (2012-04-12):**
-    * IE9 does not seem to correctly support ''pre-wrap'' either. Special handling mode activated for all version of IE<10. (Note: **ALL other browsers** correctly support this feature.) 
+    * IE9 does not seem to correctly support ''pre-wrap'' either. Special handling mode activated for all version of IE<10. (Note: **ALL other browsers** correctly support this feature.)
   * **Alpha 0.11 (2012-04-12):**
     * Automatically ignore parameters (such as &utm_source=...) added //after// the anchor by some stupid Web 2.0 services.
     * First public release.
   * **Alpha 0.12 (2012-04-18):**
     * **DISCUSSIONS !** Now you can enable discussions on your pastes. Of course, posted comments and nickname are also encrypted and the server cannot see them.
-    * This feature implies a change in storage format. You will have to delete all previous pastes in your ZeroBin. 
+    * This feature implies a change in storage format. You will have to delete all previous pastes in your ZeroBin.
     * Added [[php:vizhash_gd|Vizhash]] as avatars, so you can match posters IP addresses without revealing them. (Same image = same IP). Of course the IP address cannot be deduced from the Vizhash.
     * Remaining time before expiration is now displayed.
-    * Explicit tags were added to CSS and jQuery selectors (eg. div#aaa instead of #aaa) to speed up browser. 
+    * Explicit tags were added to CSS and jQuery selectors (eg. div#aaa instead of #aaa) to speed up browser.
     * Better cleaning of the URL (to make sure the key is not broken by some stupid redirection service)
   * **Alpha 0.13 (2012-04-18):**
     * FIXED: ''imageantialias()'' call removed because it's not really usefull and can be a problem on most hosts (if GD is not compiled in php).
     * FIXED: $error not properly initialized in index.php
   * **Alpha 0.14 (2012-04-20):**
-    * ADDED: GD presence is checked. 
+    * ADDED: GD presence is checked.
     * CHANGED: Traffic limiter data files moved to data/ (→easier rights management)
     * ADDED: "Burn after reading" implemented. Opening the URL will display the paste and immediately destroy it on server.
   * **Alpha 0.15 (2012-04-20):**
@@ -49,7 +49,7 @@
     * ADDED: Deletion URL.
     * small refactoring.
     * improved regex checks.
-    * larger server alt on installation.    
+    * larger server alt on installation.
   * **Alpha 0.18 (2013-02-24)**:
     * ADDED: The resulting URL is automatically selected after pressing "Send". You just have to press CTRL+C.
     * ADDED: Automatic syntax highlighting for 53 languages using highlight.js
@@ -66,4 +66,8 @@
   * **Alpha 0.19 (2013-07-05)**:
     * Corrected XSS security flaw which affected IE<10. Other browsers were not affected.
     * Corrected spacing display in IE<10.
-
+  * **Alpha 0.20 (2015-05-28):**
+    * Ported the layout to bootstrap for a cleaner look
+    * changed all SHA1 to SHA256 for better delete token generation
+    * upgraded libraries for highlight
+    * better comment threading using the commentid and parentcommentid
